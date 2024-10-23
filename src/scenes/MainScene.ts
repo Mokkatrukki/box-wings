@@ -1,8 +1,11 @@
+import { Ship } from '../objects/Ship';
+
 export class MainScene extends Phaser.Scene {
-    private gameWidth!: number;  // Added ! to indicate it will be initialized
-    private gameHeight!: number; // Added ! to indicate it will be initialized
+    private gameWidth!: number;
+    private gameHeight!: number;
     private debugText!: Phaser.GameObjects.Text;
-    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; // Add cursors property
+    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private ship!: Ship;
 
     constructor() {
         super({ key: 'MainScene' });
@@ -16,12 +19,8 @@ export class MainScene extends Phaser.Scene {
         // Add background color
         this.cameras.main.setBackgroundColor('#4488AA');
 
-        // Add text to show game is running
-        const titleText = this.add.text(this.gameWidth / 2, 100, 'Box Wings', {
-            font: '32px Arial',
-            color: '#ffffff'
-        });
-        titleText.setOrigin(0.5);
+        // Create ship at launch pad position
+        this.ship = new Ship(this, 100, this.gameHeight - 100);
 
         // Add debug text for input testing
         this.debugText = this.add.text(10, 10, 'Debug Info:', {
@@ -33,44 +32,33 @@ export class MainScene extends Phaser.Scene {
         this.setupInput();
 
         // Add instructions text
-        const instructions = this.add.text(this.gameWidth / 2, 150, 'Use Arrow Keys to Test Input', {
+        const instructions = this.add.text(this.gameWidth / 2, 50, 
+            'Arrow Up: Thrust\nLeft/Right: Rotate', {
             font: '20px Arial',
-            color: '#ffffff'
+            color: '#ffffff',
+            align: 'center'
         });
         instructions.setOrigin(0.5);
     }
 
     private setupInput(): void {
-        // Check if keyboard plugin is available
         if (this.input.keyboard) {
-            // Define keys we'll use
             this.cursors = this.input.keyboard.createCursorKeys();
-            
-            // Store key references for use in update
-            this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
-                this.updateDebugText('Key Pressed: ' + event.key);
-            });
-        } else {
-            console.warn('Keyboard input not available');
         }
     }
 
-    private updateDebugText(message: string): void {
-        this.debugText.setText(message);
-    }
-
     update(): void {
-        // Check cursor input
+        // Update ship
+        this.ship.update();
+
+        // Update debug info
         if (this.cursors) {
-            if (this.cursors.left.isDown) {
-                this.updateDebugText('Left key is being held down');
-            } else if (this.cursors.right.isDown) {
-                this.updateDebugText('Right key is being held down');
-            } else if (this.cursors.up.isDown) {
-                this.updateDebugText('Up key is being held down');
-            } else if (this.cursors.down.isDown) {
-                this.updateDebugText('Down key is being held down');
-            }
+            const body = this.ship.body as Phaser.Physics.Arcade.Body;
+            const velX = Math.round(body.velocity.x);
+            const velY = Math.round(body.velocity.y);
+            this.debugText.setText(
+                `Velocity X: ${velX}\nVelocity Y: ${velY}\nRotation: ${Math.round(this.ship.angle)}`
+            );
         }
     }
 }
