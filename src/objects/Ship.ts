@@ -11,25 +11,25 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
         const shipContext = shipTexture.getContext();
         if (!shipContext) throw new Error('Could not get ship context');
 
-        // Draw ship shape (triangle pointing upward)
+        // Draw ship shape (triangle pointing left)
         shipContext.fillStyle = '#00FF00';
         shipContext.strokeStyle = '#00CC00';
         shipContext.lineWidth = 2;
         
-        // Draw triangle
+        // Draw triangle (pointing left)
         shipContext.beginPath();
-        shipContext.moveTo(15, 0);     // top
+        shipContext.moveTo(0, 15);     // nose (left)
+        shipContext.lineTo(30, 0);     // top right
         shipContext.lineTo(30, 30);    // bottom right
-        shipContext.lineTo(0, 30);     // bottom left
         shipContext.closePath();
         
         // Fill and stroke
         shipContext.fill();
         shipContext.stroke();
 
-        // Optional: Add some details
+        // Optional: Add some details (engine on right side)
         shipContext.fillStyle = '#008800';
-        shipContext.fillRect(10, 20, 10, 5); // engine block
+        shipContext.fillRect(25, 10, 5, 10); // engine block
 
         shipTexture.refresh();
 
