@@ -10,12 +10,19 @@ export class Game extends Phaser.Game {
             physics: {
                 default: 'arcade',
                 arcade: {
-                    gravity: {x: 0, y: 300 },
-                    debug: false
+                    gravity: { y: 300, x: 0 },  // Added x: 0 explicitly
+                    debug: true  // Set to true to see physics bodies
                 }
             },
             scene: [LoadingScene, MainScene],
-            backgroundColor: '#1a1a1a'
+            backgroundColor: '#1a1a1a',
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
+            render: {
+                pixelArt: false
+            }
         };
         super(config);
     }
