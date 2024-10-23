@@ -27,9 +27,7 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
         shipContext.fill();
         shipContext.stroke();
 
-        // Optional: Add some details (engine on right side)
-        shipContext.fillStyle = '#008800';
-        shipContext.fillRect(25, 10, 5, 10); // engine block
+        
 
         shipTexture.refresh();
 
@@ -44,6 +42,9 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(true);
         this.setDrag(10);
         this.setAngularDrag(50);
+
+        // Set initial rotation (90 degrees = pointing down)
+        this.setAngle(90);
     }
 
     update(): void {
