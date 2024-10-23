@@ -5,13 +5,36 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, 'ship');
 
-        // Create a temporary rectangle as placeholder
-        const graphics = scene.add.graphics();
-        graphics.lineStyle(2, 0x00ff00);
-        graphics.fillStyle(0x00ff00, 1);
-        graphics.fillRect(-15, -15, 30, 30);
-        graphics.generateTexture('ship', 30, 30);
-        graphics.destroy();
+        // Create ship texture
+        const shipTexture = scene.textures.createCanvas('ship', 30, 30);
+        if (!shipTexture) throw new Error('Could not create ship texture');
+        const shipContext = shipTexture.getContext();
+        if (!shipContext) throw new Error('Could not get ship context');
+
+        // Draw ship shape (triangle pointing upward)
+        shipContext.fillStyle = '#00FF00';
+        shipContext.strokeStyle = '#00CC00';
+        shipContext.lineWidth = 2;
+        
+        // Draw triangle
+        shipContext.beginPath();
+        shipContext.moveTo(15, 0);     // top
+        shipContext.lineTo(30, 30);    // bottom right
+        shipContext.lineTo(0, 30);     // bottom left
+        shipContext.closePath();
+        
+        // Fill and stroke
+        shipContext.fill();
+        shipContext.stroke();
+
+        // Optional: Add some details
+        shipContext.fillStyle = '#008800';
+        shipContext.fillRect(10, 20, 10, 5); // engine block
+
+        shipTexture.refresh();
+
+        // Set the texture on the sprite
+        this.setTexture('ship');
 
         // Add ship to the scene and enable physics
         scene.add.existing(this);
@@ -19,8 +42,8 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
 
         // Set physics properties
         this.setCollideWorldBounds(true);
-        this.setDrag(10);         // Reduced from 50 to 10
-        this.setAngularDrag(50);  // Reduced from 100 to 50
+        this.setDrag(10);
+        this.setAngularDrag(50);
     }
 
     update(): void {
