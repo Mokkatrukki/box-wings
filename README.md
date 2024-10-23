@@ -11,7 +11,10 @@ A TypeScript Phaser game where you control a ship trying to rescue people from a
 - Git repository initialization
 
 ### Phase 2 🚧
-- (in progress)
+- ✅ Create basic scene structure
+- ✅ Implement loading scene with progress bar
+- ✅ Create main game scene
+- Implement basic game loop
 
 ## Running the project
 
