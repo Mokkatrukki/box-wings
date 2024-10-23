@@ -16,6 +16,14 @@ A TypeScript Phaser game where you control a ship trying to rescue people from a
 - ✅ Create main game scene
 - Implement basic game loop
 
+### Phase 3 ✅
+- ✅ Add ship sprite (temporary rectangle)
+- ✅ Implement ship physics
+- ✅ Add gravity effect
+- ✅ Implement upward thrust with up arrow
+- ✅ Add rotation controls
+- ✅ Fine-tune movement values for smooth control
+
 ## Running the project
 
 ```bash

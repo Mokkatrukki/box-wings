@@ -1,4 +1,5 @@
 import { Ship } from '../objects/Ship';
+import { Ground } from '../objects/Ground';
 
 export class MainScene extends Phaser.Scene {
     private gameWidth!: number;
@@ -6,6 +7,7 @@ export class MainScene extends Phaser.Scene {
     private debugText!: Phaser.GameObjects.Text;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private ship!: Ship;
+    private ground!: Ground;
 
     constructor() {
         super({ key: 'MainScene' });
@@ -19,8 +21,14 @@ export class MainScene extends Phaser.Scene {
         // Add background color
         this.cameras.main.setBackgroundColor('#4488AA');
 
+        // Create ground before ship so ship appears on top
+        this.ground = new Ground(this);
+
         // Create ship at launch pad position
         this.ship = new Ship(this, 100, this.gameHeight - 100);
+
+        // Add collision between ship and ground
+        this.physics.add.collider(this.ship, this.ground);
 
         // Add debug text for input testing
         this.debugText = this.add.text(10, 10, 'Debug Info:', {
@@ -33,7 +41,7 @@ export class MainScene extends Phaser.Scene {
 
         // Add instructions text
         const instructions = this.add.text(this.gameWidth / 2, 50, 
-            'Arrow Up: Thrust\nLeft/Right: Rotate', {
+            'Arrow Up: Thrust\nLeft/Right: Rotate\nLand on the red platform!', {
             font: '20px Arial',
             color: '#ffffff',
             align: 'center'
