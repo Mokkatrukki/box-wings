@@ -1,6 +1,7 @@
 import { Ship } from '../objects/Ship';
 import { Ground } from '../objects/Ground';
 import { Obstacle, ObstacleSpawner } from '../objects/Obstacle';
+import { GameState } from '../types/game';
 
 export class MainScene extends Phaser.Scene {
     // Scene dimensions
@@ -15,9 +16,13 @@ export class MainScene extends Phaser.Scene {
     // UI elements
     private debugText!: Phaser.GameObjects.Text;
     private instructions!: Phaser.GameObjects.Text;
+    private stateText!: Phaser.GameObjects.Text;
 
     // Input
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+
+     // Game state
+     private gameState!: GameState;
 
     constructor() {
         super({ key: 'MainScene' });
@@ -29,7 +34,80 @@ export class MainScene extends Phaser.Scene {
         this.setupCollisions();
         this.createUI();
         this.setupInput();
+
+        // Set initial game state
+        this.setGameState(GameState.START);
     }
+
+    private setGameState(state: GameState): void {
+        this.gameState = state;
+        
+        switch (state) {
+            case GameState.START:
+                this.handleStartState();
+                break;
+            case GameState.PLAYING:
+                this.handlePlayingState();
+                break;
+            case GameState.GAME_OVER:
+                this.handleGameOverState();
+                break;
+            case GameState.WIN:
+                this.handleWinState();
+                break;
+        }
+    }
+
+    private handleStartState(): void {
+        // Disable obstacles
+        if (this.obstacleSpawner) {
+            this.obstacleSpawner.getGroup().setActive(false).setVisible(false);
+        }
+
+        // Show start message
+        this.updateStateText('Press SPACE to start!', 0xffff00);
+    }
+
+    private handlePlayingState(): void {
+        // Enable obstacles
+        if (this.obstacleSpawner) {
+            this.obstacleSpawner.getGroup().setActive(true).setVisible(true);
+        }
+
+        // Clear state text
+        this.updateStateText('');
+    }
+
+    private handleGameOverState(): void {
+        // Show game over message
+        this.updateStateText('Game Over!\nPress SPACE to restart', 0xff0000);
+    }
+
+    private handleWinState(): void {
+        // Show win message
+        this.updateStateText('You Won!\nPress SPACE to restart', 0x00ff00);
+    }
+    private updateStateText(message: string, color: number = 0xffffff): void {
+        // Destroy existing text if it exists
+        if (this.stateText) {
+            this.stateText.destroy();
+        }
+    
+        // Create new text
+        this.stateText = this.add.text(
+            this.gameWidth / 2,
+            this.gameHeight / 2,
+            message,
+            {
+                font: '32px Arial',
+                align: 'center',
+                color: '#ffffff'
+            }
+        )
+        .setOrigin(0.5)
+        .setTint(color);
+    }
+    
 
     private initializeScene(): void {
         this.gameWidth = this.game.config.width as number;
@@ -62,11 +140,11 @@ export class MainScene extends Phaser.Scene {
 
     private createUI(): void {
         // Debug info
-        this.debugText = this.add.text(10, 10, 'Debug Info:', {
+        this.debugText = this.add.text(10, 10, '', {
             font: '16px Arial',
             color: '#ffffff'
         });
-
+    
         // Instructions
         this.instructions = this.add.text(
             this.gameWidth / 2,
@@ -77,18 +155,40 @@ export class MainScene extends Phaser.Scene {
                 color: '#ffffff',
                 align: 'center'
             }
-        );
-        this.instructions.setOrigin(0.5);
+        ).setOrigin(0.5);
+    
+        // Create initial state text (empty)
+        this.stateText = this.add.text(
+            this.gameWidth / 2,
+            this.gameHeight / 2,
+            '',
+            {
+                font: '32px Arial',
+                color: '#ffffff',
+                align: 'center'
+            }
+        ).setOrigin(0.5);
     }
 
     private setupInput(): void {
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
+            
+            // Add space key handler for state changes
+            this.input.keyboard.on('keydown-SPACE', () => {
+                if (this.gameState === GameState.START) {
+                    this.setGameState(GameState.PLAYING);
+                } else if (this.gameState === GameState.GAME_OVER || this.gameState === GameState.WIN) {
+                    this.scene.restart();
+                }
+            });
         }
     }
 
     private handleShipCollision(): void {
-        this.scene.restart();
+        if (this.gameState === GameState.PLAYING) {
+            this.setGameState(GameState.GAME_OVER);
+        }
     }
 
     private updateDebugInfo(): void {
@@ -103,7 +203,9 @@ export class MainScene extends Phaser.Scene {
     }
 
     update(): void {
-        this.ship.update();
-        this.updateDebugInfo();
+        if (this.gameState === GameState.PLAYING) {
+            this.ship.update();
+            this.updateDebugInfo();
+        }
     }
 }
