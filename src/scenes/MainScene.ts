@@ -3,68 +3,82 @@ import { Ground } from '../objects/Ground';
 import { Obstacle, ObstacleSpawner } from '../objects/Obstacle';
 
 export class MainScene extends Phaser.Scene {
+    // Scene dimensions
     private gameWidth!: number;
     private gameHeight!: number;
-    private debugText!: Phaser.GameObjects.Text;
-    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+
+    // Game objects
     private ship!: Ship;
     private ground!: Ground;
     private obstacleSpawner!: ObstacleSpawner;
+
+    // UI elements
+    private debugText!: Phaser.GameObjects.Text;
+    private instructions!: Phaser.GameObjects.Text;
+
+    // Input
+    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
     constructor() {
         super({ key: 'MainScene' });
     }
 
     create(): void {
-        // Store game dimensions for easy reference
+        this.initializeScene();
+        this.createGameObjects();
+        this.setupCollisions();
+        this.createUI();
+        this.setupInput();
+    }
+
+    private initializeScene(): void {
         this.gameWidth = this.game.config.width as number;
         this.gameHeight = this.game.config.height as number;
-
-        // Add background color
         this.cameras.main.setBackgroundColor('#4488AA');
+    }
 
-        // Create ground before ship so ship appears on top
+    private createGameObjects(): void {
+        // Create ground and ship
         this.ground = new Ground(this);
-
-        // Create ship at launch pad position
         this.ship = new Ship(this, 100, this.gameHeight - 100);
 
-        // Add collision between ship and ground
+        // Create obstacle spawner
+        this.obstacleSpawner = new ObstacleSpawner(this);
+    }
+
+    private setupCollisions(): void {
+        // Ground collision
         this.physics.add.collider(this.ship, this.ground);
 
-        
+        // Obstacle collision
+        this.physics.add.overlap(
+            this.ship,
+            this.obstacleSpawner.getGroup(),
+            this.handleShipCollision,
+            undefined,
+            this
+        );
+    }
 
-        // Add debug text for input testing
+    private createUI(): void {
+        // Debug info
         this.debugText = this.add.text(10, 10, 'Debug Info:', {
             font: '16px Arial',
             color: '#ffffff'
         });
 
-        // Setup keyboard input
-        this.setupInput();
-
-        // Add instructions text
-        const instructions = this.add.text(this.gameWidth / 2, 50, 
-            'Arrow Up: Thrust\nLeft/Right: Rotate\nLand on the red platform!', {
-            font: '20px Arial',
-            color: '#ffffff',
-            align: 'center'
-        });
-        instructions.setOrigin(0.5);
-
-         // Add obstacle spawner after ship creation
-         this.obstacleSpawner = new ObstacleSpawner(this);
-
-         // Add collision between ship and obstacles
-         this.physics.add.overlap(
-             this.ship, 
-             this.obstacleSpawner.getGroup(), 
-             this.handleShipCollision,
-             undefined,
-             this
-         );
-
-        
+        // Instructions
+        this.instructions = this.add.text(
+            this.gameWidth / 2,
+            50,
+            'Arrow Up: Thrust\nLeft/Right: Rotate\nLand on the red platform!',
+            {
+                font: '20px Arial',
+                color: '#ffffff',
+                align: 'center'
+            }
+        );
+        this.instructions.setOrigin(0.5);
     }
 
     private setupInput(): void {
@@ -74,15 +88,10 @@ export class MainScene extends Phaser.Scene {
     }
 
     private handleShipCollision(): void {
-        // For now, just restart the scene
         this.scene.restart();
     }
 
-    update(): void {
-        // Update ship
-        this.ship.update();
-
-        // Update debug info
+    private updateDebugInfo(): void {
         if (this.cursors) {
             const body = this.ship.body as Phaser.Physics.Arcade.Body;
             const velX = Math.round(body.velocity.x);
@@ -91,5 +100,10 @@ export class MainScene extends Phaser.Scene {
                 `Velocity X: ${velX}\nVelocity Y: ${velY}\nRotation: ${Math.round(this.ship.angle)}`
             );
         }
+    }
+
+    update(): void {
+        this.ship.update();
+        this.updateDebugInfo();
     }
 }
