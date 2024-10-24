@@ -1,35 +1,37 @@
 export class Ship extends Phaser.Physics.Arcade.Sprite {
     private readonly THRUST_SPEED = 20;  // Reduced from 200 to 20
     private readonly ROTATION_SPEED = 90; // Reduced from 180 to 90 for slower rotation
+    private static textureCreated = false;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, 'ship');
 
-        // Create ship texture
-        const shipTexture = scene.textures.createCanvas('ship', 30, 30);
-        if (!shipTexture) throw new Error('Could not create ship texture');
-        const shipContext = shipTexture.getContext();
-        if (!shipContext) throw new Error('Could not get ship context');
+        // Create ship texture only once
+        if (!Ship.textureCreated) {
+            const shipTexture = scene.textures.createCanvas('ship', 30, 30);
+            if (!shipTexture) throw new Error('Could not create ship texture');
+            const shipContext = shipTexture.getContext();
+            if (!shipContext) throw new Error('Could not get ship context');
 
-        // Draw ship shape (triangle pointing left)
-        shipContext.fillStyle = '#00FF00';
-        shipContext.strokeStyle = '#00CC00';
-        shipContext.lineWidth = 2;
-        
-        // Draw triangle (pointing left)
-        shipContext.beginPath();
-        shipContext.moveTo(0, 15);     // nose (left)
-        shipContext.lineTo(30, 0);     // top right
-        shipContext.lineTo(30, 30);    // bottom right
-        shipContext.closePath();
-        
-        // Fill and stroke
-        shipContext.fill();
-        shipContext.stroke();
+            // Draw ship shape (triangle pointing left)
+            shipContext.fillStyle = '#00FF00';
+            shipContext.strokeStyle = '#00CC00';
+            shipContext.lineWidth = 2;
+            
+            // Draw triangle (pointing left)
+            shipContext.beginPath();
+            shipContext.moveTo(0, 15);     // nose (left)
+            shipContext.lineTo(30, 0);     // top right
+            shipContext.lineTo(30, 30);    // bottom right
+            shipContext.closePath();
+            
+            // Fill and stroke
+            shipContext.fill();
+            shipContext.stroke();
 
-        
-
-        shipTexture.refresh();
+            shipTexture.refresh();
+            Ship.textureCreated = true;
+        }
 
         // Set the texture on the sprite
         this.setTexture('ship');

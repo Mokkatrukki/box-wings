@@ -1,5 +1,6 @@
 import { Ship } from '../objects/Ship';
 import { Ground } from '../objects/Ground';
+import { Obstacle, ObstacleSpawner } from '../objects/Obstacle';
 
 export class MainScene extends Phaser.Scene {
     private gameWidth!: number;
@@ -8,6 +9,7 @@ export class MainScene extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private ship!: Ship;
     private ground!: Ground;
+    private obstacleSpawner!: ObstacleSpawner;
 
     constructor() {
         super({ key: 'MainScene' });
@@ -30,6 +32,8 @@ export class MainScene extends Phaser.Scene {
         // Add collision between ship and ground
         this.physics.add.collider(this.ship, this.ground);
 
+        
+
         // Add debug text for input testing
         this.debugText = this.add.text(10, 10, 'Debug Info:', {
             font: '16px Arial',
@@ -47,12 +51,31 @@ export class MainScene extends Phaser.Scene {
             align: 'center'
         });
         instructions.setOrigin(0.5);
+
+         // Add obstacle spawner after ship creation
+         this.obstacleSpawner = new ObstacleSpawner(this);
+
+         // Add collision between ship and obstacles
+         this.physics.add.overlap(
+             this.ship, 
+             this.obstacleSpawner.getGroup(), 
+             this.handleShipCollision,
+             undefined,
+             this
+         );
+
+        
     }
 
     private setupInput(): void {
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
         }
+    }
+
+    private handleShipCollision(): void {
+        // For now, just restart the scene
+        this.scene.restart();
     }
 
     update(): void {
