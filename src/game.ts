@@ -1,5 +1,5 @@
 import { LoadingScene } from './scenes/LoadingScene';
-import { MainScene } from './scenes/MainScene';
+import { MainScene } from './scenes/main/MainScene';
 
 export class Game extends Phaser.Game {
     constructor() {
