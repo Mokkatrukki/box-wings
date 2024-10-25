@@ -1,6 +1,15 @@
 export class Ship extends Phaser.Physics.Arcade.Sprite {
-    private readonly THRUST_SPEED = 20;
-    private readonly ROTATION_SPEED = 90;
+    // Movement constants
+    private readonly THRUST_SPEED = 10;     // Increased from 20 to 200
+    private readonly MAX_VELOCITY = 200;      // Increased from 300 to 400
+    private readonly ROTATION_SPEED = 70;
+    private readonly DRAG_COEFFICIENT = 5;    // Reduced from 10 to 5
+    private readonly ANGULAR_DRAG = 50;
+
+    // Control states
+    private thrusting: boolean = false;
+    private rotating: number = 0; // -1 for left, 0 for none, 1 for right
+
     private static textureCreated = false;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -42,8 +51,10 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
 
         // Set physics properties
         this.setCollideWorldBounds(true);
-        this.setDrag(10);
-        this.setAngularDrag(50);
+        this.setDrag(this.DRAG_COEFFICIENT);
+        this.setAngularDrag(this.ANGULAR_DRAG);
+        this.setMaxVelocity(this.MAX_VELOCITY);
+        this.setBounce(0.3);  // Add some bounce for better feel
 
         // Set initial rotation (90 degrees = pointing up)
         this.setAngle(90);
@@ -65,14 +76,23 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
             } else if (cursors.right.isDown) {
                 this.rotateRight();
             }
+
+            // Optional: Handle emergency brake with space
+            if (cursors.space?.isDown) {
+                this.brake();
+            }
         }
     }
 
     private thrust(): void {
         const body = this.body as Phaser.Physics.Arcade.Body;
         const angle = Phaser.Math.DegToRad(this.angle - 90);
-        this.setVelocityY(body.velocity.y - Math.cos(angle) * this.THRUST_SPEED);
-        this.setVelocityX(body.velocity.x + Math.sin(angle) * this.THRUST_SPEED);
+        const thrustX = Math.sin(angle) * this.THRUST_SPEED;
+        const thrustY = -Math.cos(angle) * this.THRUST_SPEED;
+        
+        // Add to current velocity instead of setting it
+        this.setVelocityX(body.velocity.x + thrustX);
+        this.setVelocityY(body.velocity.y + thrustY);
     }
 
     private rotateLeft(): void {
@@ -81,5 +101,10 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
 
     private rotateRight(): void {
         this.setAngularVelocity(this.ROTATION_SPEED);
+    }
+
+    private brake(): void {
+        const body = this.body as Phaser.Physics.Arcade.Body;
+        body.setVelocity(body.velocity.x * 0.95, body.velocity.y * 0.95);
     }
 }

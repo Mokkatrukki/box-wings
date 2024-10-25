@@ -10,7 +10,7 @@ export class Game extends Phaser.Game {
             physics: {
                 default: 'arcade',
                 arcade: {
-                    gravity: { y: 300, x: 0 },  // Added x: 0 explicitly
+                    gravity: { y: 250, x: 0 },  // Added x: 0 explicitly
                     debug: true  // Set to true to see physics bodies
                 }
             },
