@@ -129,8 +129,8 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
             frequency: 50,
             alpha: { start: 1, end: 0 },
             tint: [0xffff00, 0xff8800, 0xff0000],
-            radial: false,        // Changed to false for directional emission
-            angle: { min: 10, max: 120 }  // Emit downward in a cone
+            radial: false,
+            // Remove the static angle configuration here
         });
         this.thrustParticles.stop();
     
@@ -150,12 +150,20 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
     private updateParticleEffects(): void {
         const angle = Phaser.Math.DegToRad(this.angle - 180);
         // Adjust offset to be at bottom of ship
-        const x = this.x - Math.cos(angle) * 15; // Changed to minus to reverse direction
-        const y = this.y - Math.sin(angle) * 15; // Changed to minus to reverse direction
+        const x = this.x - Math.cos(angle) * 15;
+        const y = this.y - Math.sin(angle) * 15;
     
         // Update thrust particles
         if (this.scene.input.keyboard?.createCursorKeys().up.isDown) {
             this.thrustParticles.setPosition(x, y);
+            
+            // Set particle angle based on ship's current rotation
+            // Add 90 degrees to make particles go opposite to ship's direction
+            const particleAngle = this.angle - 45 ;
+            
+            // Set a fixed angle and use speed to create a spread effect
+            this.thrustParticles.setAngle(particleAngle);
+            
             this.thrustParticles.start();
         } else {
             this.thrustParticles.stop();
@@ -163,7 +171,7 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
     
         // Update trail
         this.trailParticles.setPosition(this.x, this.y);
-    }
+    }  
     // Add method to handle collision effects
     public createExplosion(): void {
         this.scene.add.particles(this.x, this.y, 'explosion', {
