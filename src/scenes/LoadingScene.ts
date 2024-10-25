@@ -10,6 +10,8 @@ export class LoadingScene extends Phaser.Scene {
         progressBox.fillStyle(0x222222, 0.8);
         progressBox.fillRect(240, 270, 320, 50);
 
+        this.createParticleTextures();
+
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         const loadingText = this.add.text(width / 2, height / 2 - 50, 'Loading...', {
@@ -56,5 +58,38 @@ export class LoadingScene extends Phaser.Scene {
                 this.scene.start('MainScene');
             });
         });
+    }
+
+    private createParticleTextures(): void {
+        // Thrust particle
+        const thrustTexture = this.textures.createCanvas('thrust', 8, 8);
+        if (thrustTexture && thrustTexture.getContext()) {
+            const context = thrustTexture.getContext();
+            context.fillStyle = '#ffffff';
+            context.beginPath();
+            context.arc(4, 4, 3, 0, Math.PI * 2);
+            context.fill();
+            thrustTexture.refresh();
+        }
+
+        // Trail particle
+        const trailTexture = this.textures.createCanvas('trail', 4, 4);
+        if (trailTexture && trailTexture.getContext()) {
+            const context = trailTexture.getContext();
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, 4, 4);
+            trailTexture.refresh();
+        }
+
+        // Explosion particle
+        const explosionTexture = this.textures.createCanvas('explosion', 8, 8);
+        if (explosionTexture && explosionTexture.getContext()) {
+            const context = explosionTexture.getContext();
+            context.fillStyle = '#ffffff';
+            context.beginPath();
+            context.arc(4, 4, 4, 0, Math.PI * 2);
+            context.fill();
+            explosionTexture.refresh();
+        }
     }
 }
