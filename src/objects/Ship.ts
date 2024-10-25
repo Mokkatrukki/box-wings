@@ -10,10 +10,14 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
     private thrusting: boolean = false;
     private rotating: number = 0; // -1 for left, 0 for none, 1 for right
 
+    private thrustParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
+    private trailParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
+
     private static textureCreated = false;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, 'ship');
+        
 
         // Create ship texture only once
         if (!Ship.textureCreated) {
@@ -58,11 +62,17 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
 
         // Set initial rotation (90 degrees = pointing up)
         this.setAngle(90);
+
+        // Create particle effects
+        this.createParticleEffects();
+
+
     }
 
     update(): void {
         // Get cursor keys
         const cursors = this.scene.input.keyboard?.createCursorKeys();
+        this.updateParticleEffects();
         
         if (cursors) {
             // Handle thrust
@@ -106,5 +116,66 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
     private brake(): void {
         const body = this.body as Phaser.Physics.Arcade.Body;
         body.setVelocity(body.velocity.x * 0.95, body.velocity.y * 0.95);
+    }
+    
+
+    private createParticleEffects(): void {
+        // Thrust particles (engine fire)
+        this.thrustParticles = this.scene.add.particles(0, 0, 'thrust', {
+            speed: { min: 50, max: 100 },
+            scale: { start: 0.5, end: 0 },
+            blendMode: 'ADD',
+            lifespan: 500,
+            frequency: 50,
+            alpha: { start: 1, end: 0 },
+            tint: [0xffff00, 0xff8800, 0xff0000],
+            radial: false,        // Changed to false for directional emission
+            angle: { min: 10, max: 120 }  // Emit downward in a cone
+        });
+        this.thrustParticles.stop();
+    
+        // Trail effect remains the same
+        this.trailParticles = this.scene.add.particles(0, 0, 'trail', {
+            speed: 20,
+            scale: { start: 0.2, end: 0 },
+            alpha: { start: 0.5, end: 0 },
+            lifespan: 1000,
+            frequency: 100,
+            blendMode: 'ADD',
+            tint: 0x88ff88
+        });
+        this.trailParticles.start();
+    }
+
+    private updateParticleEffects(): void {
+        const angle = Phaser.Math.DegToRad(this.angle - 180);
+        // Adjust offset to be at bottom of ship
+        const x = this.x - Math.cos(angle) * 15; // Changed to minus to reverse direction
+        const y = this.y - Math.sin(angle) * 15; // Changed to minus to reverse direction
+    
+        // Update thrust particles
+        if (this.scene.input.keyboard?.createCursorKeys().up.isDown) {
+            this.thrustParticles.setPosition(x, y);
+            this.thrustParticles.start();
+        } else {
+            this.thrustParticles.stop();
+        }
+    
+        // Update trail
+        this.trailParticles.setPosition(this.x, this.y);
+    }
+    // Add method to handle collision effects
+    public createExplosion(): void {
+        this.scene.add.particles(this.x, this.y, 'explosion', {
+            speed: { min: -100, max: 100 },
+            scale: { start: 0.5, end: 0 },
+            blendMode: 'ADD',
+            lifespan: 1000,
+            gravityY: 0,
+            quantity: 20,
+            tint: [0xff0000, 0xff8800, 0xffff00],
+            emitting: false,
+            follow: this
+        });
     }
 }
