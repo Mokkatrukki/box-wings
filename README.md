@@ -2,6 +2,8 @@
 
 A TypeScript Phaser game where you control a ship trying to rescue people from a shipwreck while avoiding obstacles.
 
+https://mokkatrukki.github.io/box-wings/
+
 ## Development Phases
 
 ### Phase 1 ✅
