@@ -23,21 +23,57 @@ export class CollisionManager {
 
     private setupCollisions(): void {
         // Ground collision
-        this.scene.physics.add.collider(this.ship, this.ground);
+        this.scene.physics.add.collider(
+            this.ship,
+            this.ground,
+            undefined,
+            undefined,
+            this
+        );
 
         // Obstacle collision
         this.scene.physics.add.overlap(
             this.ship,
             this.obstacleSpawner.getGroup(),
-            this.handleShipCollision,
+            this.handleObstacleCollision,
             undefined,
             this
         );
+
+        // Rescue area landing detection
+        try {
+            const rescueArea = this.ground.getRescueArea();
+            console.log('Setting up rescue area collision', rescueArea);
+            if(rescueArea){
+                this.scene.physics.add.overlap(
+                    this.ship,
+                    rescueArea,
+                    () => {
+                        console.log('Rescue area collision detected!');
+                        this.handleRescueAreaLanding();
+                    },
+                    undefined,
+                    this
+                );
+
+            }
+            
+        } catch (error) {
+            console.error('Error setting up rescue area collision:', error);
+        }
     }
 
-    private handleShipCollision(): void {
+    private handleObstacleCollision(): void {
         if (this.stateManager.isPlaying()) {
+            console.log('Obstacle collision!');
             this.stateManager.setState(GameState.GAME_OVER);
+        }
+    }
+
+    private handleRescueAreaLanding(): void {
+        if (this.stateManager.isPlaying()) {
+            console.log('Setting win state!');
+            this.stateManager.setState(GameState.WIN);
         }
     }
 }

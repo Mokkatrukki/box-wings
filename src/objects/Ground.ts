@@ -1,5 +1,6 @@
 export class Ground extends Phaser.Physics.Arcade.StaticGroup {
     private static texturesCreated = false;
+    private rescueArea: Phaser.Physics.Arcade.Sprite | null = null;
 
     constructor(scene: Phaser.Scene) {
         super(scene.physics.world, scene);
@@ -59,12 +60,17 @@ export class Ground extends Phaser.Physics.Arcade.StaticGroup {
         const launchPad = scene.physics.add.staticSprite(100, height - 40, 'launchpad');
         this.add(launchPad);
 
-        // Add rescue area on the right side
-        const rescueArea = scene.physics.add.staticSprite(width - 100, height - 40, 'rescue');
-        this.add(rescueArea);
+        // Create rescue area separately (don't add to group)
+        this.rescueArea = scene.physics.add.staticSprite(width - 100, height - 40, 'rescue');
+        // Enable physics body explicitly
+        (this.rescueArea.body as Phaser.Physics.Arcade.StaticBody).setSize(64, 16);
 
         // Add ship wreck near rescue area
         const shipWreck = scene.physics.add.staticSprite(width - 170, height - 44, 'wreck');
         this.add(shipWreck);
+    }
+
+    public getRescueArea(): Phaser.Physics.Arcade.Sprite | null {
+        return this.rescueArea;
     }
 }

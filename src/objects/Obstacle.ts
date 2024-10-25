@@ -7,7 +7,6 @@ export class Obstacle extends Phaser.Physics.Arcade.Sprite {
 
         // Create obstacle texture only once
         if (!Obstacle.textureCreated) {
-            // Create obstacle texture
             const obstacleTexture = scene.textures.createCanvas('obstacle', 20, 20);
             if (!obstacleTexture) throw new Error('Could not create obstacle texture');
             const obstacleContext = obstacleTexture.getContext();
@@ -45,7 +44,6 @@ export class Obstacle extends Phaser.Physics.Arcade.Sprite {
         });
     }
 }
-
 
 export class ObstacleSpawner {
     private scene: Phaser.Scene;

@@ -1,6 +1,6 @@
 export class Ship extends Phaser.Physics.Arcade.Sprite {
-    private readonly THRUST_SPEED = 20;  // Reduced from 200 to 20
-    private readonly ROTATION_SPEED = 90; // Reduced from 180 to 90 for slower rotation
+    private readonly THRUST_SPEED = 20;
+    private readonly ROTATION_SPEED = 90;
     private static textureCreated = false;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -45,7 +45,7 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
         this.setDrag(10);
         this.setAngularDrag(50);
 
-        // Set initial rotation (90 degrees = pointing down)
+        // Set initial rotation (90 degrees = pointing up)
         this.setAngle(90);
     }
 
@@ -69,11 +69,8 @@ export class Ship extends Phaser.Physics.Arcade.Sprite {
     }
 
     private thrust(): void {
-        // Ensure body exists and is Arcade Physics body
         const body = this.body as Phaser.Physics.Arcade.Body;
-        
-        // Calculate velocity based on ship's rotation
-        const angle = Phaser.Math.DegToRad(this.angle - 90); // -90 because our ship points upward
+        const angle = Phaser.Math.DegToRad(this.angle - 90);
         this.setVelocityY(body.velocity.y - Math.cos(angle) * this.THRUST_SPEED);
         this.setVelocityX(body.velocity.x + Math.sin(angle) * this.THRUST_SPEED);
     }
